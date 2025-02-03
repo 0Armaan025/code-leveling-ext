@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as os from 'os';
 
 let timerStartTime: number | undefined;
 let timerInterval: NodeJS.Timeout | undefined;
@@ -9,12 +10,16 @@ let currentLanguage: string = '';
 let totalTimeSpent: number = 0;
 let startDate: string = '';
 let projectName: string = '';
-let projectStats: { [key: string]: number } = {}; // Store time spent per language
+let projectStats: { [key: string]: number } = {};
 
-const desktopPath = path.join(require('os').homedir(), 'OneDrive/Desktop'); // Path to the Desktop
-const timeTrackerFilePath = path.join(desktopPath, 'timeTracker.json'); // Save on Desktop
+// Path to the AppData/Roaming folder
+const appDataPath = path.join(os.homedir(), 'AppData', 'Roaming', 'Code-leveling'); // Replace 'YourAppName' with your application name or project name
+const timeTrackerFilePath = path.join(appDataPath, 'timeTracker.json');
 
-// Function to start the timer
+// Ensure the directory exists
+fs.mkdirSync(appDataPath, { recursive: true });
+
+// Function to start tracking time
 function startTrackingTime() {
   if (timerStartTime !== undefined) {
     return; // Timer is already running
@@ -41,9 +46,17 @@ function startTrackingTime() {
       updateStatusBarItem();
     }
   }, 1000); // Update every second
+
+  // Call "Hi" function every 7 minutes (420,000 milliseconds)
+  setInterval(sayHi, 7 * 60 * 1000); // 7 minutes
 }
 
-// Function to stop the timer
+// Function that says "Hi"
+function sayHi() {
+  vscode.window.showInformationMessage('Hi');
+}
+
+// Function to stop tracking time
 function stopTrackingTime() {
   if (timerInterval) {
     clearInterval(timerInterval);
@@ -58,6 +71,7 @@ function stopTrackingTime() {
     timerStartTime = undefined;
     saveTimeTrackingData();
     updateStatusBarItem();
+    // Prevent multiple notifications
     vscode.window.showInformationMessage(`Stopped tracking time for ${currentLanguage}. Time spent: ${timeSpent / 1000}s`);
   }
 }
@@ -84,7 +98,7 @@ function saveTimeTrackingData() {
 function loadTimeTrackingData() {
   fs.readFile(timeTrackerFilePath, 'utf8', (err, data) => {
     if (err) {
-      return; // If the file doesn't exist or is empty, no need to load anything
+      return; 
     }
     try {
       const parsedData = JSON.parse(data);
@@ -115,7 +129,6 @@ function onEditorChange() {
   }
 }
 
-// Function to update the status bar with the total time spent
 let statusBarItem: vscode.StatusBarItem;
 function updateStatusBarItem() {
   if (statusBarItem) {
@@ -128,7 +141,7 @@ function updateStatusBarItem() {
   }
 }
 
-// Function to handle API key prompt when the status bar is clicked
+// Handle status bar click
 function handleStatusBarClick() {
   vscode.window.showInputBox({ prompt: 'Enter your API Key' }).then((apiKey) => {
     if (apiKey) {
@@ -184,7 +197,7 @@ export function activate(context: vscode.ExtensionContext) {
   // Handle editor change events to track language
   const editorChangeDisposable = vscode.window.onDidChangeActiveTextEditor(onEditorChange);
 
-  // Register the command for status bar click event
+  // Status bar click disposable
   const statusBarClickDisposable = vscode.commands.registerCommand('extension.handleStatusBarClick', handleStatusBarClick);
   context.subscriptions.push(startCommand, stopCommand, showCommand, showProjectStats, editorChangeDisposable, statusBarClickDisposable);
 }
