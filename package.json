@@ -10,29 +10,27 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:code-leveling.start",
+
     "onCommand:code-leveling.stop",
-    "onCommand:code-leveling.showTime",
-    "onCommand:code-leveling.showProjectStats"
+    "onCommand:code-leveling.start",
+    "onCommand:code-leveling.showStats"
+
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
-        {
-            "command": "code-leveling.start",
-            "title": "Start Time Tracking"
-          },
+
           {
             "command": "code-leveling.stop",
             "title": "Stop Time Tracking"
           },
           {
-            "command": "code-leveling.showTime",
-            "title": "Show Time Spent"
+            "command": "code-leveling.start",
+            "title": "Start Time Tracking"
           },
           {
-            "command": "code-leveling.showProjectStats",
-            "title": "Show Project Stats"
+            "command": "code-leveling.showStats",
+            "title": "Show Stats"
           }
     ]
   },
